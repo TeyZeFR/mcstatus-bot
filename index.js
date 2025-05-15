@@ -4,38 +4,41 @@ http.createServer((req, res) => {
   res.end('Bot is running');
 }).listen(process.env.PORT || 3000);
 
-require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
-const fetch = require('node-fetch');
+const axios = require('axios');
+require('dotenv').config();
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds]
+});
 
-const CHANNEL_ID = process.env.CHANNEL_ID;
-const MC_URL = 'https://api.mcstatus.io/v2/status/java/109.239.154.30:26065';
+const API_URL = 'https://api.mcstatus.io/v2/status/java/109.239.154.30:26065';
 
-async function updateStatus() {
+async function updateCategoryName() {
   try {
-    const res = await fetch(MC_URL);
-    const data = await res.json();
-    const isOnline = data.online;
+    const response = await axios.get(API_URL);
+    const isOnline = response.data.online;
 
-    const channel = await client.channels.fetch(CHANNEL_ID);
-    if (!channel) return console.log('Salon introuvable');
+    const statusEmoji = isOnline ? '🟢' : '🔴';
+    const name = `『🎮』Statut serveur : ${statusEmoji}`;
 
-    const newName = `Statut : ${isOnline ? '🟢' : '🔴'}`;
-    if (channel.name !== newName) {
-      await channel.setName(newName);
-      console.log(`Salon mis à jour : ${newName}`);
+    const category = await client.channels.fetch(process.env.CHANNEL_ID);
+    if (category && category.type === 4) {
+      await category.setName(name);
+      console.log(`[✓] Catégorie mise à jour : ${name}`);
+    } else {
+      console.error('[X] Le channel spécifié n’est pas une catégorie.');
     }
-  } catch (e) {
-    console.error('Erreur :', e.message);
+  } catch (err) {
+    console.error('[X] Erreur lors de la requête ou mise à jour :', err.message);
   }
 }
 
 client.once('ready', () => {
-  console.log(`Connecté en tant que ${client.user.tag}`);
-  updateStatus();
-  setInterval(updateStatus, 60000);
+  console.log(`✅ Connecté en tant que ${client.user.tag}`);
+  updateCategoryName();
+  setInterval(updateCategoryName, 2 * 60 * 1000); // toutes les 2 minutes
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
