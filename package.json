@@ -1,13 +1,14 @@
 {
-  "name": "mcstatus-bot",
+  "name": "mcstatus-discord-bot",
   "version": "1.0.0",
+  "description": "Bot qui met à jour le nom d'une catégorie avec le statut d'un serveur Minecraft",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.3.1",
-    "node-fetch": "^2.6.7"
+    "discord.js": "^14.13.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.3.1"
   }
 }
